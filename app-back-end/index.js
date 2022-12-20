@@ -5,6 +5,7 @@ const mongoDB = "mongodb://mongo:mongo@ac-lqxfsw1-shard-00-00.nwi27cn.mongodb.ne
 const UserRouter = require('./routers/user.router');
 
 const app = express();
+app.use(express.json());
 app.use('/user',UserRouter);
 
 mongoose.connect(mongoDB, (error) => {
