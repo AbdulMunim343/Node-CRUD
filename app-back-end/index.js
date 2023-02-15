@@ -5,15 +5,10 @@ const connectDB = require('./config/database')
 
 connectDB();
 const app = express();
-
+app.use(express.json());
 
 //routers
-const UserRouter = require('./routers/user.router');
-
-app.use(express.json());
-app.use('/user',UserRouter);
-
-
+app.use('/user',require('./routers/user.router'));
 
 app.listen(port, () => {
     console.log(`Server is Running on port ${port}`)
