@@ -1,6 +1,8 @@
 const express = require("express");
 const userModel = require('../model/user.model')
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const JWT = require("jsonwebtoken")
 
 
 const getAllUsers = async (req, res) => {
@@ -14,14 +16,36 @@ const getAllUsers = async (req, res) => {
 
 const addUsers = async (req, res) => {
   const { first_name, last_name, username, password } = req.body;
-  const createNewUser = new userModel({ first_name, last_name, username, password });
 
-  try {
-    await createNewUser.save();
-    res.status(201).json(createNewUser);
-  } catch (error) {
-    res.status(409).json({ message: error.message });
+  if (!first_name || !last_name || !username || !password) {
+    res.status(400)
+    throw new Error("Add all fields")
   }
+
+  ///if check user exist
+  const userExist = await userModel.findOne({ username });
+  if (userExist) {
+    res.status(400);
+    throw new Error("user already exist");
+  }
+
+  //Hash Password
+  const salt = await bcrypt.genSalt(10);
+  const hashPassword = await bcrypt.hash(password, salt);
+
+  const NewUser = await userModel.create({ first_name, last_name, username, password: hashPassword });
+  if (NewUser) {
+    res.status(201).json({
+      _id:NewUser.id,
+      first_name:NewUser.first_name, 
+      last_name:NewUser.last_name,
+      username:NewUser.username, 
+    });
+  } else {
+    res.status(400)
+    throw new Error("Invalid User Data")
+  }
+
 };
 
 const getUserById = async (req, res) => {
